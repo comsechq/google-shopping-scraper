@@ -1,12 +1,17 @@
 const Apify = require('apify');
+const url = require('url');
 const { REQUEST_TYPES } = require('./consts');
 
 const { log, sleep } = Apify.utils;
 const { applyFunction } = require('./utils');
 
-async function handleSearchPage(params, requestQueue, maxPostCount, isAdvancedResults, evaledFunc) {
+async function handleSearchPage(params, requestQueue, maxPagesPerQuery, isAdvancedResults, evaledFunc) {
     const { request, $ } = params;
     const { hostname, query } = request.userData;
+
+    log.info(JSON.stringify(request.userData));
+
+    const parsedUrl = url.parse(request.url, true);
 
     const linkPrefix = `http://${hostname}`;
 
@@ -20,17 +25,12 @@ async function handleSearchPage(params, requestQueue, maxPostCount, isAdvancedRe
     if (resultElements.length === 0) {
         log.warning('The page has no results. Check dataset for more info.');
 
-        await Apify.pushData({
+        return {
             'noResults': true,
             // '#body': $('body').html(),
             '#html': $.html(),
             '#debug': Apify.utils.createRequestDebugInfo(request),
-        });
-    }
-
-    // limit the results to be scraped, if maxPostCount exists
-    if (maxPostCount) {
-        resultElements = resultElements.slice(0, maxPostCount);
+        };
     }
 
     // for each result element, grab data and push it to results array
@@ -110,6 +110,8 @@ async function handleSearchPage(params, requestQueue, maxPostCount, isAdvancedRe
         results.push(output);
     });
 
+    const searchResults = [];
+
     // for each result, enqueue product page
     for (let i = 0; i < results.length; i++) {
         let result = results[i];
@@ -132,7 +134,11 @@ async function handleSearchPage(params, requestQueue, maxPostCount, isAdvancedRe
             // if extended output fnction exists, apply it now.
             if (evaledFunc) result = await applyFunction($, evaledFunc, result);
 
-            await Apify.pushData(result);
+            searchResults.push({
+                status: 200,
+                result: result
+            });
+
             continue; // eslint-disable-line
         }
 
@@ -148,6 +154,34 @@ async function handleSearchPage(params, requestQueue, maxPostCount, isAdvancedRe
 
     // slow down scraping to avoid being blocked by google
     await sleep(1000);
+
+    let nextPageUrl = $('a#pnnext').attr('href');
+    let currentPage = request.userData.page;
+
+    if (nextPageUrl) {
+        if (currentPage < maxPagesPerQuery && maxPagesPerQuery) {
+
+            request.userData.page++;
+
+            await requestQueue.addRequest({
+                url: `${linkPrefix}${nextPageUrl}`,
+                userData: {
+                    ...request.userData,
+                    type: REQUEST_TYPES.SEARCH_PAGE
+                },
+            });
+
+        } else {
+            log.info(`Not enqueueing next page for query "${parsedUrl.query.q}" because the "maxPagesPerQuery" limit has been reached.`);
+        }
+    } else {
+        log.info(`This is the last page for query "${parsedUrl.query.q}". Next page button has not been found.`);
+    }
+
+    // Log some nice info for user.
+    log.info(`Finished query "${parsedUrl.query.q}" page ${currentPage}`);
+
+    return searchResults;
 }
 
 module.exports = {

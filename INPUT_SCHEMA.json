@@ -520,12 +520,12 @@
                 "Zimbabwe"
             ]
         },
-        "maxPostCount": {
-            "title": "Max Post Count",
+        "maxPagesPerQuery": {
+            "title": "Max Pages Per Query",
             "type": "integer",
-            "description": "Limit of the results to be scraped per page (0 means no limit)",
-            "minimum": 0,
-            "default": 0
+            "description": "The maximum number of search result pages crawled for each search query or URL. Note that a value greater than one might significantly slow down the actor.",
+            "default": 1,
+            "minimum": 1
         },
         "isAdvancedResults": {
             "title": "Is Advanced Results",

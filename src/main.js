@@ -1,4 +1,6 @@
 const Apify = require('apify');
+const rp = require('./rp-wrapper.js');
+
 const { log } = Apify.utils;
 const { checkAndEval } = require('./utils');
 
@@ -16,7 +18,7 @@ Apify.main(async () => {
     const {
         queries,
         countryCode,
-        maxPostCount,
+        maxPagesPerQuery,
         isAdvancedResults,
         extendOutputFunction = null,
     } = input;
@@ -31,6 +33,7 @@ Apify.main(async () => {
     requestList.sources.forEach(s => console.log('  ', s.url));
 
     const requestQueue = await Apify.openRequestQueue();
+    const dataset = await Apify.openDataset();
 
     // if exists, evaluate extendOutputFunction
     let evaledFunc;
@@ -46,18 +49,21 @@ Apify.main(async () => {
         requestList,
         requestQueue,
         useApifyProxy: true,
-        // apifyProxyGroups: ['GOOGLE_SERP'],
-        apifyProxyGroups: ['RESIDENTIAL'],
+        apifyProxyGroups: ['GOOGLE_SERP'],
+        //apifyProxyGroups: ['RESIDENTIAL'],
         // proxyUrls: [ proxyUrl ],
-        handlePageFunction: (params) => {
+        handlePageFunction: async (params) => {
             const { request } = params;
-            if (request.userData.type === REQUEST_TYPES.SEARCH_PAGE) return handleSearchPage(params, requestQueue, maxPostCount, isAdvancedResults, evaledFunc);
-            return handleProductPage(params, isAdvancedResults, evaledFunc);
+            const data = request.userData.type === REQUEST_TYPES.SEARCH_PAGE ?
+                            await handleSearchPage(params, requestQueue, maxPagesPerQuery, isAdvancedResults, evaledFunc) :
+                            await handleProductPage(params, isAdvancedResults, evaledFunc);
+
+            await dataset.pushData(data);
         },
         handleFailedRequestFunction: async ({ request }) => {
             log.warning(`Request ${request.url} failed too many times`);
 
-            await Apify.pushData({
+            await dataset.pushData({
                 '#debug': Apify.utils.createRequestDebugInfo(request),
             });
         },
@@ -68,4 +74,47 @@ Apify.main(async () => {
 
     // Log the finish message, so that the user sees that the scraping is finished
     log.info('Processed all items');
+
+    const { datasetId } = dataset;
+    
+    if (datasetId) {
+        log.info(`Scraping is finished, see you next time.
+Full results in JSON format:
+https://api.apify.com/v2/datasets/${datasetId}/items?format=json
+Simplified organic results in JSON format:
+https://api.apify.com/v2/datasets/${datasetId}/items?format=json&fields=searchQuery,organicResults&unwind=organicResults`);
+    } else {
+        log.info('Scraping is finished, see you next time.');
+    }
+
+    if(input.webhook) {
+
+        // Push the result to API Gateway which will call the Lambda and put the results in S3.
+        log.info('Pushing results to the webhook.');
+
+        const datasetData = {
+            'datasetId': datasetId,
+            'data': input.webhook.finishWebhookData
+        };
+
+        const maxRetries = 3;
+
+        for (let retry = 0; retry < maxRetries; retry++) {
+            try {
+
+                const out = await rp.rp({
+                    url: input.webhook.url,
+                    method: input.webhook.method,
+                    json: datasetData,
+                    headers: input.webhook.headers
+                });
+
+                console.log(out);
+                break;
+
+            } catch (e) {
+                console.log(e);
+            }
+        };
+    }
 });

@@ -66,7 +66,10 @@ async function handleProductPage({ request, $ }, isAdvancedResults, evaledFunc) 
         // if extended output fnction exists, apply it now.
         if (evaledFunc) result = await applyFunction($, evaledFunc, result);
 
-        await Apify.pushData(result);
+        return {
+            status: 200,
+            result: result
+        };
     }
 
     const productDetails = {};
@@ -109,10 +112,13 @@ async function handleProductPage({ request, $ }, isAdvancedResults, evaledFunc) 
     // if extended output fnction exists, apply it now.
     if (evaledFunc) result = await applyFunction($, evaledFunc, result);
 
-    await Apify.pushData(result);
-
     // slow down scraping to avoid being blocked by google
     await Apify.utils.sleep(1000);
+
+    return {
+        status: 200,
+        result: result
+    };
 }
 
 module.exports = {

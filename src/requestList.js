@@ -20,6 +20,7 @@ function prepareRequestList(queries, countryCode) {
             url,
             userData: {
                 type: REQUEST_TYPES.SEARCH_PAGE,
+                page: 1,
                 query,
                 hostname,
             },
