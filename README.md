@@ -14,7 +14,7 @@ Google Shopping Scraper is an [Apify actor](https://apify.com/actors) for extrac
 | ----- | ---- | ----------- |
 | queries | Array of Strings | (required) List of queries to search for |
 | countryCode | String | (required) Provide the country to search in (choose from the country list when using the editor, provide the country code when using JSON) |
-| maxPostCount | Integer | Limit of the results to be scraped per page, 0 means no limit. Currently the actor scrapes only the 1st page (20 results) |
+| maxPagesPerQuery | Integer | Number of pages of results to scrape.
 | isAdvancedResults | Boolean | Check this if you want to scrape more data. Your dataset items will have more fields including `merchantName` and `reviews` |
 | extendOutputFunction | string | Function that takes a JQuery handle ($) as argument and returns data that will be merged with the default output. More information in [Extend output function](#extend-output-function) |
 
@@ -26,7 +26,7 @@ INPUT Example:
     "iphone 11 pro"
   ],
   "countryCode": "US",
-  "maxPostCount": 1,
+  "maxPagesPerQuery": 1,
   "isAdvancedResults": false
 }
 ```
