@@ -11,7 +11,7 @@ function countryCodeToGoogleHostname(countryCode) {
     }
 }
 
-function prepareRequestList(queries, countryCode) {
+async function prepareRequestList(queries, countryCode) {
     const hostname = countryCodeToGoogleHostname(countryCode);
     const sources = queries.map((query) => {
         const url = `http://${hostname}/search?q=${encodeURIComponent(query)}&tbm=shop&tbs=vw:l`;
@@ -22,11 +22,12 @@ function prepareRequestList(queries, countryCode) {
                 type: REQUEST_TYPES.SEARCH_PAGE,
                 page: 1,
                 query,
-                hostname,
-            },
+                hostname
+            }
         });
     });
-    return Apify.openRequestList('products', sources);
+
+    return await Apify.openRequestList('products', sources);
 }
 
 module.exports = {
