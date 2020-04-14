@@ -9,7 +9,8 @@ async function handleSearchPage(params, requestQueue, maxPagesPerQuery, isAdvanc
     const { request, $ } = params;
     const { hostname, query } = request.userData;
 
-    log.info(JSON.stringify(request.userData));
+    log.info(`Request URL   : ${request.url}`);
+    log.info(`Request Data  : ${JSON.stringify(request.userData)}`);
 
     const parsedUrl = url.parse(request.url, true);
 
