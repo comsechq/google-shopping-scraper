@@ -164,12 +164,12 @@ async function handleSearchPage(params, requestQueue, maxPagesPerQuery, isAdvanc
 
             request.userData.page++;
 
+            const start = (request.userData.page - 1) * 20;
+            const url = `https://${request.userData.hostname}/search?q=${encodeURIComponent(request.userData.query)}&tbm=shop&tbs=vw:l&start=${start}`;
+
             await requestQueue.addRequest({
-                url: `${linkPrefix}${nextPageUrl}`,
-                userData: {
-                    ...request.userData,
-                    type: REQUEST_TYPES.SEARCH_PAGE
-                },
+                url: url,
+                userData: request.userData
             });
 
         } else {

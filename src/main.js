@@ -47,11 +47,6 @@ Apify.main(async () => {
         apifyProxyGroups: ['GOOGLE_SERP'],
         handlePageFunction: async (params) => {
             const { request, $ } = params;
-            const html = $.html();
-
-            // Log the html to try and work out what is happening
-            log.info(html);
-
             const data = request.userData.type === REQUEST_TYPES.SEARCH_PAGE ?
                             await handleSearchPage(params, requestQueue, maxPagesPerQuery, isAdvancedResults, evaledFunc) :
                             await handleProductPage(params, isAdvancedResults, evaledFunc);
