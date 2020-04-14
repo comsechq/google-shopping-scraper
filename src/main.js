@@ -45,6 +45,8 @@ Apify.main(async () => {
         requestQueue,
         useApifyProxy: true,
         apifyProxyGroups: ['GOOGLE_SERP'],
+        handlePageTimeoutSecs: 60,
+        requestTimeoutSecs: 180,
         handlePageFunction: async (params) => {
             const { request, $ } = params;
             const data = request.userData.type === REQUEST_TYPES.SEARCH_PAGE ?
