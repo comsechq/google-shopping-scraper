@@ -84,9 +84,7 @@ Apify.main(async () => {
     if (datasetId) {
         log.info(`Scraping is finished, see you next time.
 Full results in JSON format:
-https://api.apify.com/v2/datasets/${datasetId}/items?format=json
-Simplified organic results in JSON format:
-https://api.apify.com/v2/datasets/${datasetId}/items?format=json&fields=searchQuery,organicResults&unwind=organicResults`);
+https://api.apify.com/v2/datasets/${datasetId}/items?format=json`);
     } else {
         log.info('Scraping is finished, see you next time.');
     }

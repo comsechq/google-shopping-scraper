@@ -177,7 +177,8 @@ async function handleSearchPage(params, requestQueue, maxPagesPerQuery, isAdvanc
             request.userData.page++;
 
             await requestQueue.addRequest({
-                url: nextPageHref,
+                //url: nextPageHref,
+                url: `${linkPrefix}${nextPageUrl}`,
                 userData: request.userData
             });
 
