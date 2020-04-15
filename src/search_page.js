@@ -156,18 +156,28 @@ async function handleSearchPage(params, requestQueue, maxPagesPerQuery, isAdvanc
     // slow down scraping to avoid being blocked by google
     await sleep(1000);
 
-    let nextPageUrl = $('a#pnnext').attr('href');
     let currentPage = request.userData.page;
+    
+    // Enqueue new page. Universal "next page" selector
+    const searchOffset = currentPage * 20;
+    const nextPageUrl = $(`a[href*="start=${searchOffset}"]`).attr('href');
 
     if (nextPageUrl) {
         if (currentPage < maxPagesPerQuery && maxPagesPerQuery) {
 
+            const nextPageHref = url.format({
+                ...parsedUrl,
+                search: undefined,
+                query: {
+                    ...parsedUrl.query,
+                    start: `${searchOffset}`,
+                },
+            });
+
             request.userData.page++;
 
-            const url = `${linkPrefix}${nextPageUrl}`
-            
             await requestQueue.addRequest({
-                url: url,
+                url: nextPageHref,
                 userData: request.userData
             });
 
