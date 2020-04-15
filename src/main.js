@@ -55,13 +55,12 @@ Apify.main(async () => {
 
             await dataset.pushData(data);
         },
-        handleFailedRequestFunction: async ({ request }) => {
+        handleFailedRequestFunction: async ({ request, error }) => {
             log.warning(`Request ${request.url} failed too many times`);
-
-            await dataset.pushData({
-                '#debug': Apify.utils.createRequestDebugInfo(request),
-            });
-        },
+            
+            log.warning(error);
+            log.warning(Apify.utils.createRequestDebugInfo(request));
+        }
     });
 
     // Process the queries
