@@ -60,7 +60,7 @@ Apify.main(async () => {
             }
 
             if (saveHtmlToKeyValueStore) {
-                const key = `${request.id}.html`;
+                const key = `${request.userData.type}-${request.id}.html`;
                 await keyValueStore.setValue(key, body, { contentType: 'text/html; charset=utf-8' });
                 data.htmlSnapshotUrl = keyValueStore.getPublicUrl(key);
             }
