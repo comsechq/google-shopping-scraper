@@ -57,9 +57,9 @@ Apify.main(async () => {
         },
         handleFailedRequestFunction: async ({ request, error }) => {
             log.warning(`Request ${request.url} failed too many times`);
-            
+
             log.warning(error);
-            log.warning(Apify.utils.createRequestDebugInfo(request));
+            log.warning(JSON.stringify(Apify.utils.createRequestDebugInfo(request)));
         }
     });
 

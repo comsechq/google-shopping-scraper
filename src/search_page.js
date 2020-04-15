@@ -164,9 +164,8 @@ async function handleSearchPage(params, requestQueue, maxPagesPerQuery, isAdvanc
 
             request.userData.page++;
 
-            const start = (request.userData.page - 1) * 20;
-            const url = `https://${request.userData.hostname}/search?q=${encodeURIComponent(request.userData.query)}&tbm=shop&tbs=vw:l&start=${start}`;
-
+            const url = `${linkPrefix}${nextPageUrl}`
+            
             await requestQueue.addRequest({
                 url: url,
                 userData: request.userData
