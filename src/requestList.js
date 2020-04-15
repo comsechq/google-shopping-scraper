@@ -13,19 +13,23 @@ function countryCodeToGoogleHostname(countryCode) {
 
 async function prepareRequestList(queries, countryCode) {
     const hostname = countryCodeToGoogleHostname(countryCode);
-    const sources = queries.map((query) => {
-        const url = `http://${hostname}/search?q=${encodeURIComponent(query)}&tbm=shop&tbs=vw:l`;
+    const sources = queries
+            .split('\n')
+            .map(item => item.trim())
+            .filter(item => !!item)
+            .map((query) => {
+                const url = `http://${hostname}/search?q=${encodeURIComponent(query)}&tbm=shop&tbs=vw:l`;
 
-        return new Apify.Request({
-            url,
-            userData: {
-                type: REQUEST_TYPES.SEARCH_PAGE,
-                page: 1,
-                query,
-                hostname
-            }
-        });
-    });
+                return new Apify.Request({
+                    url,
+                    userData: {
+                        type: REQUEST_TYPES.SEARCH_PAGE,
+                        page: 1,
+                        query,
+                        hostname
+                    }
+                });
+            });
 
     return await Apify.openRequestList('products', sources);
 }

@@ -20,6 +20,8 @@ Apify.main(async () => {
         countryCode,
         maxPagesPerQuery,
         isAdvancedResults,
+        saveHtml, 
+        saveHtmlToKeyValueStore,
         extendOutputFunction = null,
     } = input;
 
@@ -29,11 +31,11 @@ Apify.main(async () => {
 
     // Prepare the initial list of google shopping queries and request queue
     const requestList = await prepareRequestList(queries, countryCode);
-    log.info('Search URLs:');
-    requestList.sources.forEach(s => console.log('  ', s.url));
+    if (!requestList.length) throw new Error('The input must contain at least one search query or URL.');
 
     const requestQueue = await Apify.openRequestQueue();
     const dataset = await Apify.openDataset();
+    const keyValueStore = await Apify.openKeyValueStore();
 
     // if exists, evaluate extendOutputFunction
     let evaledFunc;
@@ -48,10 +50,20 @@ Apify.main(async () => {
         handlePageTimeoutSecs: 60,
         requestTimeoutSecs: 180,
         handlePageFunction: async (params) => {
-            const { request, $ } = params;
+            const { request, body } = params;
             const data = request.userData.type === REQUEST_TYPES.SEARCH_PAGE ?
                             await handleSearchPage(params, requestQueue, maxPagesPerQuery, isAdvancedResults, evaledFunc) :
                             await handleProductPage(params, isAdvancedResults, evaledFunc);
+
+            if (saveHtml) {
+                data.html = body;
+            }
+
+            if (saveHtmlToKeyValueStore) {
+                const key = `${request.id}.html`;
+                await keyValueStore.setValue(key, body, { contentType: 'text/html; charset=utf-8' });
+                data.htmlSnapshotUrl = keyValueStore.getPublicUrl(key);
+            }
 
             await dataset.pushData(data);
         },

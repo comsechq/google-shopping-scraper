@@ -6,16 +6,17 @@
     "properties": {
         "queries": {
             "title": "Search Queries",
-            "type": "array",
-            "description": "Here you can provide a list of search queries as an Javascript array",
-            "editor": "stringList",
-            "prefill": ["iPhone x"]
+            "type": "string",
+            "description": "Google shopping queries (e.g. <code>iPhone X</code>).",
+            "prefill": "iPhone X",
+            "editor": "textarea",
+            "pattern": "[^\\s]+"
         },
         "countryCode": {
             "title": "Country",
             "type": "string",
             "editor": "select",
-            "prefill": "US",
+            "default": "",
             "description": "Here you can select in which country should the products be looked up",
             "enum": [
                 "AF",
@@ -533,6 +534,19 @@
             "editor": "checkbox",
             "description": "Check it if you want more data into your results",
             "default": true
+        },
+        "saveHtml": {
+            "title": "Save HTML to dataset",
+            "type": "boolean",
+            "description": "If checked, the HTML of Google Search results pages will be stored to the default dataset, under the <code>html</code> property. This is useful if you need to process the HTML, but it makes the dataset large and reduces performance.",
+            "default": false,
+            "groupCaption": "Options"
+        },
+        "saveHtmlToKeyValueStore": {
+            "title": "Save HTML to key-value store",
+            "type": "boolean",
+            "description": "If checked, the HTML of the Google Search results pages will be stored to the default key-value store and links to the files stored to the dataset under the <code>htmlSnapshotUrl</code> property. This is useful for debugging, since you can easily view the the pages in browser, but use of this feature has some performance penalty.",
+            "default": false
         },
         "extendOutputFunction": {
             "title": "Extend output function",
