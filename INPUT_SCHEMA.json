@@ -521,10 +521,17 @@
                 "Zimbabwe"
             ]
         },
+        "resultsPerPage": {
+            "title": "Results Per Page",
+            "type": "integer",
+            "description": "Number of results per page. By default, Google Shopping returns 20 results. The allowed values are: <code>20</code>, <code>30</code>, <code>40</code>, <code>50</code> and <code>100</code>.",
+            "maximum": 100,
+            "minimum": 1
+        },
         "maxPagesPerQuery": {
             "title": "Max Pages Per Query",
             "type": "integer",
-            "description": "The maximum number of search result pages crawled for each search query or URL. Note that a value greater than one might significantly slow down the actor.",
+            "description": "The maximum number of result pages crawled for each query. Note that a value greater than one might significantly slow down the actor.",
             "default": 1,
             "minimum": 1
         },
@@ -538,14 +545,14 @@
         "saveHtml": {
             "title": "Save HTML to dataset",
             "type": "boolean",
-            "description": "If checked, the HTML of Google Search results pages will be stored to the default dataset, under the <code>html</code> property. This is useful if you need to process the HTML, but it makes the dataset large and reduces performance.",
+            "description": "If checked, the HTML of Google Shopping results pages will be stored to the default dataset, under the <code>html</code> property. This is useful if you need to process the HTML, but it makes the dataset large and reduces performance.",
             "default": false,
             "groupCaption": "Options"
         },
         "saveHtmlToKeyValueStore": {
             "title": "Save HTML to key-value store",
             "type": "boolean",
-            "description": "If checked, the HTML of the Google Search results pages will be stored to the default key-value store and links to the files stored to the dataset under the <code>htmlSnapshotUrl</code> property. This is useful for debugging, since you can easily view the the pages in browser, but use of this feature has some performance penalty.",
+            "description": "If checked, the HTML of the Google Shopping results pages will be stored to the default key-value store and links to the files stored to the dataset under the <code>htmlSnapshotUrl</code> property. This is useful for debugging, since you can easily view the the pages in browser, but use of this feature has some performance penalty.",
             "default": false
         },
         "extendOutputFunction": {

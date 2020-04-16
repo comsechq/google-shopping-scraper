@@ -15,9 +15,10 @@ Apify.main(async () => {
     // Validate the input
     if (!input) throw new Error('Missing configuration');
 
-    const {
+    let {
         queries,
         countryCode,
+        resultsPerPage,
         maxPagesPerQuery,
         isAdvancedResults,
         saveHtml, 
@@ -29,8 +30,10 @@ Apify.main(async () => {
         throw new Error('Missing configuration');
     }
 
+    resultsPerPage = resultsPerPage || 20;
+
     // Prepare the initial list of google shopping queries and request queue
-    const requestList = await prepareRequestList(queries, countryCode);
+    const requestList = await prepareRequestList(queries, countryCode, resultsPerPage);
     if (!requestList.length) throw new Error('The input must contain at least one search query or URL.');
 
     const requestQueue = await Apify.openRequestQueue();
@@ -52,7 +55,7 @@ Apify.main(async () => {
         handlePageFunction: async (params) => {
             const { request, body } = params;
             const data = request.userData.type === REQUEST_TYPES.SEARCH_PAGE ?
-                            await handleSearchPage(params, requestQueue, maxPagesPerQuery, isAdvancedResults, evaledFunc) :
+                            await handleSearchPage(params, requestQueue, resultsPerPage, maxPagesPerQuery, isAdvancedResults, evaledFunc) :
                             await handleProductPage(params, isAdvancedResults, evaledFunc);
 
             if (saveHtml) {

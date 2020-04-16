@@ -11,14 +11,15 @@ function countryCodeToGoogleHostname(countryCode) {
     }
 }
 
-async function prepareRequestList(queries, countryCode) {
+async function prepareRequestList(queries, countryCode, resultsPerPage) {
+
     const hostname = countryCodeToGoogleHostname(countryCode);
     const sources = queries
             .split('\n')
             .map(item => item.trim())
             .filter(item => !!item)
             .map((query) => {
-                const url = `http://${hostname}/search?q=${encodeURIComponent(query)}&tbm=shop&tbs=vw:l`;
+                const url = `http://${hostname}/search?q=${encodeURIComponent(query)}&tbm=shop&tbs=vw:l&xprovider=X&num=${resultsPerPage}`;
 
                 return new Apify.Request({
                     url,

@@ -5,7 +5,7 @@ const { REQUEST_TYPES } = require('./consts');
 const { log, sleep } = Apify.utils;
 const { applyFunction } = require('./utils');
 
-async function handleSearchPage(params, requestQueue, maxPagesPerQuery, isAdvancedResults, evaledFunc) {
+async function handleSearchPage(params, requestQueue, resultsPerPage, maxPagesPerQuery, isAdvancedResults, evaledFunc) {
     const { request, $ } = params;
     const { hostname, query } = request.userData;
 
@@ -159,7 +159,7 @@ async function handleSearchPage(params, requestQueue, maxPagesPerQuery, isAdvanc
     let currentPage = request.userData.page;
     
     // Enqueue new page. Universal "next page" selector
-    const searchOffset = currentPage * 20;
+    const searchOffset = currentPage * resultsPerPage;
     const nextPageUrl = $(`a[href*="start=${searchOffset}"]`).attr('href');
 
     if (nextPageUrl) {
@@ -170,15 +170,14 @@ async function handleSearchPage(params, requestQueue, maxPagesPerQuery, isAdvanc
                 search: undefined,
                 query: {
                     ...parsedUrl.query,
-                    start: `${searchOffset}`,
+                    start: `${searchOffset}`
                 },
             });
 
             request.userData.page++;
 
             await requestQueue.addRequest({
-                //url: nextPageHref,
-                url: `${linkPrefix}${nextPageUrl}`,
+                url: nextPageHref,
                 userData: request.userData
             });
 
