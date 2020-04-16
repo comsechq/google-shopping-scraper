@@ -3,9 +3,8 @@ const url = require('url');
 const { REQUEST_TYPES } = require('./consts');
 
 const { log, sleep } = Apify.utils;
-const { applyFunction } = require('./utils');
 
-async function handleSearchPage(params, requestQueue, resultsPerPage, maxPagesPerQuery, isAdvancedResults, evaledFunc) {
+async function handleSearchPage(params, requestQueue, resultsPerPage, maxPagesPerQuery) {
     const { request, $ } = params;
     const { hostname, query } = request.userData;
 
@@ -41,48 +40,42 @@ async function handleSearchPage(params, requestQueue, resultsPerPage, maxPagesPe
         const contentElement = result.find('div[class$="__content"]');
         const titleElement = contentElement.find('h3');
         const merchantNameElement = contentElement.find('a[class$="__merchant-name"]');
-        const merchantMetricsElement = contentElement.find('a[href*="shopping/ratings/account/metrics?q="]');
-        const reviewsElement = contentElement.find('a[href$="#reviews"]');
         const priceElement = contentElement.find('div > div > div > div > div > span > span[aria-hidden="true"]');
         const shoppingUrlElement = contentElement.find('a[href*="shopping/product/"]');
 
         let linkElement = contentElement.find('a[jsaction="spop.c"]');
-        if (linkElement.length > 1) linkElement = $(linkElement.get(0));
-        else linkElement = null;
+
+        if (linkElement.length > 1) {
+            linkElement = $(linkElement.get(0));
+        } else { 
+            linkElement = null;
+        }
 
         let productName = '';
-        if (titleElement.length) productName = titleElement.text().trim();
+        if (titleElement.length) {
+            productName = titleElement.text().trim();
+        }
 
         let price = '';
-        if (priceElement.length) price = priceElement.text().trim();
+        if (priceElement.length) {
+            price = priceElement.text().trim();
+        }
 
         let description = '';
 
         let merchantName = '';
         let merchantLink = '';
+
         if (merchantNameElement.length) {
             merchantName = merchantNameElement.text().trim();
             merchantLink = `${linkPrefix}${merchantNameElement.attr('href')}`;
-        }
-
-        let merchantMetrics = '';
-        if (merchantMetricsElement.length) merchantMetrics = merchantMetricsElement.text().trim();
-
-        let reviewsLink = '';
-        let reviewsScore = '';
-        let reviewsCount = '';
-        if (reviewsElement.length) {
-            reviewsLink = `${linkPrefix}${reviewsElement.attr('href')}`;
-            const scoreElement = reviewsElement.find('span div[aria-label]');
-            if (scoreElement) reviewsScore = scoreElement.attr('aria-label').trim();
-            const countElement = reviewsElement.find('span[aria-label]');
-            if (countElement) reviewsCount = countElement.text().trim();
         }
 
         const link = `${linkPrefix}${linkElement.prop('href')}`;
 
         let shoppingId = '';
         let shoppingUrl = '';
+
         if (shoppingUrlElement.length) {
             const firstShoppingUrlElement = $(shoppingUrlElement.get(0));
             shoppingUrl = firstShoppingUrlElement.attr('href').split('?').shift();
@@ -91,21 +84,14 @@ async function handleSearchPage(params, requestQueue, resultsPerPage, maxPagesPe
         }
 
         const output = {
-            query,
             productName,
             productLink: link,
             price,
             description,
             merchantName,
-            merchantMetrics,
-            merchantLink,
             shoppingId,
             shoppingUrl,
-            reviewsLink,
-            reviewsScore,
-            reviewsCount,
-            positionOnSearchPage: index + 1,
-            productDetails: null,
+            positionOnSearchPage: index + 1
         };
 
         results.push(output);
@@ -119,21 +105,6 @@ async function handleSearchPage(params, requestQueue, resultsPerPage, maxPagesPe
 
         // If result does not contain shopping ID, then we cannot load product detail page, so directly output the item
         if (!result.shoppingId) {
-            // if basic results, re-initialize result object with relevant props
-            if (!isAdvancedResults) {
-                result = {
-                    shoppingId: result.shoppingId,
-                    productName: result.productName,
-                    description: result.description,
-                    merchantMetrics: result.merchantMetrics,
-                    seller: null,
-                    price: result.price,
-                    merchantLink: result.merchantLink
-                }
-            }
-
-            // if extended output fnction exists, apply it now.
-            if (evaledFunc) result = await applyFunction($, evaledFunc, result);
 
             searchResults.push({
                 status: 200,

@@ -535,13 +535,6 @@
             "default": 1,
             "minimum": 1
         },
-        "isAdvancedResults": {
-            "title": "Is Advanced Results",
-            "type": "boolean",
-            "editor": "checkbox",
-            "description": "Check it if you want more data into your results",
-            "default": true
-        },
         "saveHtml": {
             "title": "Save HTML to dataset",
             "type": "boolean",
@@ -554,14 +547,6 @@
             "type": "boolean",
             "description": "If checked, the HTML of the Google Shopping results pages will be stored to the default key-value store and links to the files stored to the dataset under the <code>htmlSnapshotUrl</code> property. This is useful for debugging, since you can easily view the the pages in browser, but use of this feature has some performance penalty.",
             "default": false
-        },
-        "extendOutputFunction": {
-            "title": "Extend output function",
-            "type": "string",
-            "editor": "javascript",
-            "description": "A function which result will get merged with the default result. It must return an object.",
-            "prefill": "($) => {\n    const result = {};\n    // Uncomment to modify the title of each item of the output\n    // result.title = 'Test Title';\n\n    return result;\n}",
-            "sectionCaption": "Advanced options"
         }
     },
     "required": ["queries", "countryCode"]

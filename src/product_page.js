@@ -1,11 +1,9 @@
 const Apify = require('apify');
-const { applyFunction } = require('./utils');
-
 
 function getSellers(productElement, $, linkPrefix) {
+
     // get all sellers
     const sellerRows = productElement.find('#sh-osd__online-sellers-cont .sh-osd__offer-row');
-
     const results = [];
 
     // For each seller, get data and push it to results array
@@ -14,21 +12,19 @@ function getSellers(productElement, $, linkPrefix) {
 
         const price = row.find('td:nth-child(3)').text().trim();
         const additionalPrice = row.find('.sh-osd__content table tbody tr:nth-child(2) td:first-child').text().trim();
+
         let totalPrice = row.find('.sh-osd__total-price').text().trim();
         if (!totalPrice) totalPrice = price;
-        const ratingDiv = row.find('.sh-osd__merchant-info-container > div');
-        let rating = '';
-        let ratingCount = 0;
-        if (ratingDiv.text().trim().length > 0) {
-            rating = row.find('.sh-osd__merchant-info-container > div > span').text().trim();
-            ratingCount = row.find('.sh-osd__merchant-info-container > div > a').text().trim();
+
+        let url = row.find('.sh-osd__seller-link').prop('href');
+
+        if (!url.startsWith('http')) {
+            url = `${linkPrefix}${url}`;
         }
 
         results.push({
-            productLink: `${linkPrefix}${row.find('.sh-osd__seller-link').prop('href')}`,
-            merchant: row.find('.sh-osd__seller-link span:first-child').text().trim(),
-            merchantMetrics: `${rating} ${ratingCount}`.trim(),
-            details: row.find('td.SH30Lb:nth-child(2) > div').text().trim(),
+            productLink: url,
+            merchantName: row.find('.sh-osd__seller-link span:first-child').text().trim(),
             price,
             totalPrice,
             additionalPrice,
@@ -40,7 +36,7 @@ function getSellers(productElement, $, linkPrefix) {
 }
 
 
-async function handleProductPage({ request, $ }, isAdvancedResults, evaledFunc) {
+async function handleProductPage({ request, $ }) {
     const { hostname } = request.userData;
     let { result } = request.userData;
 
@@ -50,21 +46,6 @@ async function handleProductPage({ request, $ }, isAdvancedResults, evaledFunc) 
 
     // Page does not contain product details end here
     if (!productElement.length) {
-        // if basic results, re-initialize result object with relevant props
-        if (!isAdvancedResults) {
-            result = {
-                shoppingId: result.shoppingId,
-                productName: result.productName,
-                description: result.description,
-                merchantMetrics: result.merchantMetrics,
-                seller: result.productDetails ? result.productDetails.sellers : null,
-                price: result.price,
-                merchantLink: result.merchantLink
-            }
-        }
-
-        // if extended output fnction exists, apply it now.
-        if (evaledFunc) result = await applyFunction($, evaledFunc, result);
 
         return {
             status: 200,
@@ -72,53 +53,40 @@ async function handleProductPage({ request, $ }, isAdvancedResults, evaledFunc) 
         };
     }
 
-    const productDetails = {};
-
-    // get product images and add it to productDetails
-    const imageElements = productElement.find('div.main-image img[class*="__image"]');
-    if (imageElements.length) {
-        productDetails.images = [];
-        imageElements.each(function () {
-            productDetails.images.push($(this).attr('src'));
-        });
-    }
-
-    // get sellers data and add it to productDetails
-    productDetails.sellers = getSellers(productElement, $, linkPrefix);
-
-    // add productDetails to result object
-    result.productDetails = productDetails;
-
     // grab description
     const descriptionSpan = productElement.find('p.sh-ds__desc span[style="display:none"]');
+
     if (descriptionSpan) {
         const desc = descriptionSpan.text();
         result.description = desc.replace('« less', '');
     }
 
-    // if basic results, re-initialize result object with relevant props
-    if (!isAdvancedResults) {
-        result = {
-            shoppingId: result.shoppingId,
-            productName: result.productName,
-            description: result.description,
-            merchantMetrics: result.merchantMetrics,
-            seller: result.productDetails.sellers,
-            price: result.price,
-            merchantLink: result.merchantLink
-        }
-    }
+    // get sellers data and add it to productDetails
+    const sellers = getSellers(productElement, $, linkPrefix);
 
-    // if extended output fnction exists, apply it now.
-    if (evaledFunc) result = await applyFunction($, evaledFunc, result);
+    const productResults = [];
+
+    sellers.forEach(sellerEntry => {
+
+        let seller = sellerEntry;
+        
+        seller.productName = result.productName;
+        seller.description = result.description;
+        seller.merchantName = result.merchantName;
+        seller.shoppingId = result.shoppingId;
+        seller.shoppingUrl = result.shoppingUrl;
+        seller.positionOnSearchPage = result.positionOnSearchPage;
+
+        productResults.push({
+            status: 200,
+            result: seller
+        });
+    });
 
     // slow down scraping to avoid being blocked by google
     await Apify.utils.sleep(1000);
 
-    return {
-        status: 200,
-        result: result
-    };
+    return productResults;
 }
 
 module.exports = {

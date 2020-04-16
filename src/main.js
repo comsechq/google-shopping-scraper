@@ -2,7 +2,6 @@ const Apify = require('apify');
 const rp = require('./rp-wrapper.js');
 
 const { log } = Apify.utils;
-const { checkAndEval } = require('./utils');
 
 const { REQUEST_TYPES } = require('./consts');
 const { prepareRequestList } = require('./requestList');
@@ -20,10 +19,8 @@ Apify.main(async () => {
         countryCode,
         resultsPerPage,
         maxPagesPerQuery,
-        isAdvancedResults,
         saveHtml, 
-        saveHtmlToKeyValueStore,
-        extendOutputFunction = null,
+        saveHtmlToKeyValueStore
     } = input;
 
     if (!queries || !queries.length || !countryCode) {
@@ -40,10 +37,6 @@ Apify.main(async () => {
     const dataset = await Apify.openDataset();
     const keyValueStore = await Apify.openKeyValueStore();
 
-    // if exists, evaluate extendOutputFunction
-    let evaledFunc;
-    if (extendOutputFunction) evaledFunc = checkAndEval(extendOutputFunction);
-
     // Configure the crawler
     const crawler = new Apify.CheerioCrawler({
         requestList,
@@ -55,8 +48,8 @@ Apify.main(async () => {
         handlePageFunction: async (params) => {
             const { request, body } = params;
             const data = request.userData.type === REQUEST_TYPES.SEARCH_PAGE ?
-                            await handleSearchPage(params, requestQueue, resultsPerPage, maxPagesPerQuery, isAdvancedResults, evaledFunc) :
-                            await handleProductPage(params, isAdvancedResults, evaledFunc);
+                            await handleSearchPage(params, requestQueue, resultsPerPage, maxPagesPerQuery) :
+                            await handleProductPage(params);
 
             if (saveHtml) {
                 data.html = body;

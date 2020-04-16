@@ -5,7 +5,6 @@ Google Shopping Scraper is an [Apify actor](https://apify.com/actors) for extrac
 - [Output](#output)
 - [Google SERP](#google-serp)
 - [Expected CU consumption](#expected-cu-consumption)
-- [Extend output function](#extend-output-function)
 - [Open an issue](#open-an-issue)
 
 ### Input
@@ -14,9 +13,8 @@ Google Shopping Scraper is an [Apify actor](https://apify.com/actors) for extrac
 | ----- | ---- | ----------- |
 | queries | Array of Strings | (required) List of queries to search for |
 | countryCode | String | (required) Provide the country to search in (choose from the country list when using the editor, provide the country code when using JSON) |
+| resultsPerPage | Integer | Number of results to get per page.
 | maxPagesPerQuery | Integer | Number of pages of results to scrape.
-| isAdvancedResults | Boolean | Check this if you want to scrape more data. Your dataset items will have more fields including `merchantName` and `reviews` |
-| extendOutputFunction | string | Function that takes a JQuery handle ($) as argument and returns data that will be merged with the default output. More information in [Extend output function](#extend-output-function) |
 
 INPUT Example:
 
@@ -26,8 +24,8 @@ INPUT Example:
     "iphone 11 pro"
   ],
   "countryCode": "US",
-  "maxPagesPerQuery": 1,
-  "isAdvancedResults": false
+  "resultsPerPage": 100,
+  "maxPagesPerQuery": 1
 }
 ```
 
@@ -62,26 +60,6 @@ Example of one output item:
 
 ### Google SERP
 The actor uses Google SERP Proxy to scrape localized results. For more information, check the [documentation](https://docs.apify.com/proxy/google-serp-proxy).
-
-### Extend output function
-
-You can use this function to update the default output of this actor. This function gets a JQuery handle `$` as an argument so you can choose what data from the page you want to scrape. The output from this will function will get merged with the default output.
-
-The **return value** of this function has to be an **object**!
-
-You can return fields to achieve 3 different things:
-- Add a new field - Return object with a field that is not in the default output
-- Change a field - Return an existing field with a new value
-- Remove a field - Return an existing field with a value `undefined`
-
-The following example will add a new field:
-```
-($) => {
-    return {
-        comment: 'This is a comment',
-    }
-}
-```
 
 ### Expected CU consumption
 Expected compute units is 0.0272 every 10 products.
