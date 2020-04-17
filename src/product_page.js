@@ -72,7 +72,6 @@ async function handleProductPage({ request, $ }) {
         
         seller.productName = result.productName;
         seller.description = result.description;
-        seller.merchantName = result.merchantName;
         seller.shoppingId = result.shoppingId;
         seller.shoppingUrl = result.shoppingUrl;
         seller.positionOnSearchPage = result.positionOnSearchPage;
