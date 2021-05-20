@@ -43,7 +43,7 @@ async function handleSearchPage(params, requestQueue, resultsPerPage, maxPagesPe
         const priceElement = contentElement.find('div > div > div > div > div > span > span[aria-hidden="true"]');
         const shoppingUrlElement = contentElement.find('a[href*="shopping/product/"]');
 
-        let linkElement = contentElement.find('a[jsaction="spop.c"]');
+        let linkElement = contentElement.find('a[jsaction="trigger.HWpvL"]');
 
         if (linkElement.length > 1) {
             linkElement = $(linkElement.get(0));
