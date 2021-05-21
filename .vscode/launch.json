@@ -10,7 +10,12 @@
             "request": "launch",
             "program": "${workspaceFolder}\\src\\main.js",
             "env" : {
-                "NODE_ENV": "testing"
+                "NODE_ENV": "testing",
+                "APIFY_LOCAL_STORAGE_DIR": "./apify_storage/",
+                "APIFY_DEFAULT_KEY_VALUE_STORE_ID": "default",
+                "APIFY_DEFAULT_DATASET_ID": "default",
+                "APIFY_DEFAULT_REQUEST_QUEUE_ID": "default",
+                "APIFY_PROXY_PASSWORD": "H5BYXGKLBgn2T93yvFbaWsXob"
             }
         }
     ]

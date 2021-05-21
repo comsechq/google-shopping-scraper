@@ -37,12 +37,15 @@ Apify.main(async () => {
     const dataset = await Apify.openDataset();
     const keyValueStore = await Apify.openKeyValueStore();
 
+    let proxyConfiguration = await Apify.createProxyConfiguration({
+        groups: ['GOOGLE_SERP']
+    })
+
     // Configure the crawler
     const crawler = new Apify.CheerioCrawler({
         requestList,
         requestQueue,
-        useApifyProxy: true,
-        apifyProxyGroups: ['GOOGLE_SERP'],
+        proxyConfiguration,
         handlePageTimeoutSecs: 60,
         requestTimeoutSecs: 180,
         handlePageFunction: async (params) => {

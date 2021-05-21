@@ -18,6 +18,9 @@ function getSellers(productElement, $, linkPrefix) {
 
         let url = row.find('.sh-osd__seller-link').prop('href');
 
+        if(url == undefined){
+            url = row.find('a').prop('href');
+        }
         if (!url.startsWith('http')) {
             url = `${linkPrefix}${url}`;
         }

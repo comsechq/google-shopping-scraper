@@ -18,6 +18,7 @@ async function handleSearchPage(params, requestQueue, resultsPerPage, maxPagesPe
     const results = [];
 
     let resultElements = $('div[class$="list-result"]');
+    const beforeYouContinue = $('h3');
 
     log.info(`Processing "${query}" - found ${resultElements.length} products`);
 
@@ -37,7 +38,7 @@ async function handleSearchPage(params, requestQueue, resultsPerPage, maxPagesPe
     resultElements.each(function (index) {
         const result = $(this);
 
-        const contentElement = result.find('div[class$="__content"]');
+        const contentElement = result.find('div.sh-dlr__content');
         const titleElement = contentElement.find('h3');
         const merchantNameElement = contentElement.find('a[class$="__merchant-name"]');
         const priceElement = contentElement.find('div > div > div > div > div > span > span[aria-hidden="true"]');
